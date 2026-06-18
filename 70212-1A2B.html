@@ -1,0 +1,328 @@
+DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌲 森林探險 1A2B</title>
+
+<style>
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    font-family:"Microsoft JhengHei",sans-serif;
+
+    background:
+    linear-gradient(
+        rgba(255,255,255,0.75),
+        rgba(255,255,255,0.75)
+    ),
+    url("https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=1600&q=80");
+
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+
+    min-height:100vh;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    padding:20px;
+}
+
+.game-box{
+    width:100%;
+    max-width:700px;
+
+    background:rgba(255,255,255,0.92);
+
+    border-radius:20px;
+
+    padding:30px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,0.25);
+
+    text-align:center;
+}
+
+.animals{
+    font-size:42px;
+    margin-bottom:10px;
+
+    animation:float 4s ease-in-out infinite;
+}
+
+@keyframes float{
+    0%{transform:translateY(0);}
+    50%{transform:translateY(-8px);}
+    100%{transform:translateY(0);}
+}
+
+h1{
+    color:#2e7d32;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    color:#558b2f;
+    margin-bottom:25px;
+}
+
+.input-area{
+    margin-bottom:20px;
+}
+
+input{
+    width:180px;
+    padding:12px;
+
+    font-size:20px;
+    text-align:center;
+
+    border:2px solid #4caf50;
+    border-radius:10px;
+}
+
+button{
+    margin:5px;
+    padding:12px 18px;
+
+    border:none;
+    border-radius:10px;
+
+    font-size:16px;
+
+    background:#43a047;
+    color:white;
+
+    cursor:pointer;
+
+    transition:0.25s;
+}
+
+button:hover{
+    background:#2e7d32;
+}
+
+#message{
+    min-height:40px;
+    margin-top:15px;
+
+    font-size:20px;
+    font-weight:bold;
+
+    color:#1b5e20;
+}
+
+table{
+    width:100%;
+    margin-top:20px;
+
+    border-collapse:collapse;
+
+    background:white;
+}
+
+th{
+    background:#388e3c;
+    color:white;
+}
+
+th,td{
+    border:1px solid #c8e6c9;
+    padding:10px;
+}
+
+tbody tr:nth-child(even){
+    background:#f1f8e9;
+}
+
+.footer{
+    margin-top:15px;
+    color:#666;
+    font-size:14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="game-box">
+
+    <div class="animals">
+        🦌 🐿️ 🦋 🦉 🌲
+    </div>
+
+    <h1>森林探險 1A2B</h1>
+
+    <div class="subtitle">
+        找出森林精靈藏起來的神秘數字！
+    </div>
+
+    <div class="input-area">
+        <input
+            type="text"
+            id="guessInput"
+            maxlength="4"
+            placeholder="輸入4位數字">
+
+        <br>
+
+        <button onclick="checkGuess()">
+            🔍 尋找線索
+        </button>
+
+        <button onclick="newGame()">
+            🌱 開始新探險
+        </button>
+    </div>
+
+    <div id="message"></div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>探索次數</th>
+                <th>線索數字</th>
+                <th>森林回應</th>
+            </tr>
+        </thead>
+
+        <tbody id="history"></tbody>
+    </table>
+
+    <div class="footer">
+        A = 數字與位置都正確<br>
+        B = 數字正確但位置錯誤
+    </div>
+
+</div>
+
+<script>
+let answer = "";
+let count = 0;
+
+function generateAnswer() {
+
+    let digits = [];
+
+    while (digits.length < 4) {
+
+        let n = Math.floor(Math.random() * 10).toString();
+
+        if (digits.length === 0 && n === "0") {
+            continue;
+        }
+
+        if (!digits.includes(n)) {
+            digits.push(n);
+        }
+    }
+
+    return digits.join("");
+}
+
+function newGame() {
+
+    answer = generateAnswer();
+    count = 0;
+
+    document.getElementById("history").innerHTML = "";
+
+    document.getElementById("guessInput").value = "";
+
+    document.getElementById("message").innerHTML =
+        "🌲 森林精靈已藏好新的數字！";
+
+    console.log("答案：", answer);
+}
+
+function validateInput(text) {
+
+    if (!/^\d{4}$/.test(text)) {
+        return "請輸入 4 位數字";
+    }
+
+    let set = new Set(text);
+
+    if (set.size !== 4) {
+        return "數字不可重複";
+    }
+
+    return "";
+}
+
+function checkGuess() {
+
+    const guess =
+        document.getElementById("guessInput")
+        .value
+        .trim();
+
+    const error = validateInput(guess);
+
+    if (error) {
+        document.getElementById("message").innerHTML = "⚠️ " + error;
+        return;
+    }
+
+    let A = 0;
+    let B = 0;
+
+    for (let i = 0; i < 4; i++) {
+
+        if (guess[i] === answer[i]) {
+            A++;
+        }
+        else if (answer.includes(guess[i])) {
+            B++;
+        }
+    }
+
+    count++;
+
+    const row = document.createElement("tr");
+
+    row.innerHTML = `
+        <td>${count}</td>
+        <td>${guess}</td>
+        <td>${A}A${B}B</td>
+    `;
+
+    document.getElementById("history")
+            .prepend(row);
+
+    if (A === 4) {
+
+        document.getElementById("message").innerHTML =
+            `🎉✨ 森林精靈出現了！<br>
+            恭喜找到神秘數字！<br>
+            共探索 ${count} 次`;
+
+    } else {
+
+        document.getElementById("message").innerHTML =
+            `🌿 森林給你的線索：${A}A${B}B`;
+    }
+
+    document.getElementById("guessInput").value = "";
+    document.getElementById("guessInput").focus();
+}
+
+document
+.getElementById("guessInput")
+.addEventListener("keypress", function(event){
+    if(event.key === "Enter"){
+        checkGuess();
+    }
+});
+
+newGame();
+</script>
+
+</body>
+</html>
